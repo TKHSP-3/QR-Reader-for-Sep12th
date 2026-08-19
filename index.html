@@ -72,9 +72,38 @@ function onScanSuccess(decodedText){
         const url = new URL(decodedText);
 
         statusArea.innerText =
-        "QRコードを認識しました。移動します...";
+        "受付完了。出席確認ページを開いています。";
 
-        window.location.href = url.href;
+        // 出席確認ページを別タブで開く
+        window.open(url.href, "_blank");
+
+        // 読み取り停止
+        html5QrCode.pause();
+
+        let sec = 10;
+
+        const timer = setInterval(() => {
+
+            sec--;
+
+            statusArea.innerText =
+            "受付完了。次の受付まで " +
+            sec +
+            " 秒";
+
+            if(sec <= 0){
+
+                clearInterval(timer);
+
+                scanned = false;
+
+                statusArea.innerText =
+                "QRコードをかざしてください";
+
+                html5QrCode.resume();
+            }
+
+        }, 1000);
 
     }catch(e){
 
@@ -84,42 +113,3 @@ function onScanSuccess(decodedText){
         scanned = false;
     }
 }
-
-const html5QrCode =
-new Html5Qrcode("reader");
-
-Html5Qrcode.getCameras()
-.then(cameras => {
-
-    if(cameras.length > 0){
-
-        statusArea.innerText =
-        "QRコードをかざしてください";
-
-        html5QrCode.start(
-            cameras[0].id,
-            {
-                fps:10,
-                qrbox:250
-            },
-            onScanSuccess
-        );
-
-    }else{
-
-        statusArea.innerText =
-        "カメラが見つかりません";
-    }
-})
-.catch(err => {
-
-    statusArea.innerText =
-    "カメラ起動エラー";
-
-    console.error(err);
-});
-
-</script>
-
-</body>
-</html>
