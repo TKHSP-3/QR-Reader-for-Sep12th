@@ -7,7 +7,7 @@
 <title>説明会 出席確認QRリーダー</title>
 
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-
+    
 <style>
 body{
     font-family:"Yu Gothic",sans-serif;
@@ -71,7 +71,15 @@ function onScanSuccess(decodedText){
 
         const url = new URL(decodedText);
 
-        window.open(url.href, "_blank");
+       const popup = window.open(url.href, "attendance");
+
+setTimeout(() => {
+    try {
+        popup.close();
+    } catch(e) {
+        console.log(e);
+    }
+}, 5000);
 
         let sec = 5;
 
