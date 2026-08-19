@@ -6,7 +6,7 @@
 
 <title>説明会 出席確認QRリーダー</title>
 
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+2.3.8/html5-qrcode.min.js"></script>
 
 <style>
 body{
@@ -29,7 +29,8 @@ body{
 }
 
 #status{
-    font-size:20px;
+    font-size:24px;
+    font-weight:bold;
     color:#0066cc;
 }
 </style>
@@ -42,8 +43,7 @@ body{
 <h1>説明会 出席確認</h1>
 
 <p>
-QRコードをカメラにかざしてください。<br>
-読み取り後、自動で移動します。
+QRコードをカメラにかざしてください
 </p>
 
 <div id="reader"></div>
@@ -71,23 +71,21 @@ function onScanSuccess(decodedText){
 
         const url = new URL(decodedText);
 
-        statusArea.innerText =
-        "受付完了。出席確認ページを開いています。";
-
-        // 出席確認ページを別タブで開く
         window.open(url.href, "_blank");
 
-        // 読み取り停止
-        html5QrCode.pause();
+        let sec = 5;
 
-        let sec = 10;
+        statusArea.innerText =
+        "✅ 受付完了　次の受付まで " +
+        sec +
+        " 秒";
 
         const timer = setInterval(() => {
 
             sec--;
 
             statusArea.innerText =
-            "受付完了。次の受付まで " +
+            "✅ 受付完了　次の受付まで " +
             sec +
             " 秒";
 
@@ -99,11 +97,9 @@ function onScanSuccess(decodedText){
 
                 statusArea.innerText =
                 "QRコードをかざしてください";
-
-                html5QrCode.resume();
             }
 
-        }, 1000);
+        },1000);
 
     }catch(e){
 
@@ -113,3 +109,44 @@ function onScanSuccess(decodedText){
         scanned = false;
     }
 }
+
+const html5QrCode =
+new Html5Qrcode("reader");
+
+Html5Qrcode.getCameras()
+.then(cameras => {
+
+    if(cameras.length > 0){
+
+        statusArea.innerText =
+        "QRコードをかざしてください";
+
+        html5QrCode.start(
+            cameras[0].id,
+            {
+                fps:10,
+                qrbox:250
+            },
+            onScanSuccess
+        );
+
+    }else{
+
+        statusArea.innerText =
+        "カメラが見つかりません";
+    }
+
+})
+.catch(err => {
+
+    statusArea.innerText =
+    "カメラ起動エラー";
+
+    console.error(err);
+
+});
+
+</script>
+
+</body>
+</html>
