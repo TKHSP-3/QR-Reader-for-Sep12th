@@ -6,7 +6,11 @@
 
 <title>説明会 出席確認QRリーダー</title>
 
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></scriptnt-family: "Yu Gothic", sans-serif;
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+<style>
+body{
+    font-family:"Yu Gothic",sans-serif;
     text-align:center;
     background:#f5f5f5;
     margin:0;
@@ -18,37 +22,19 @@
     margin:auto;
 }
 
-h1{
-    color:#333;
-}
-
 #reader{
     width:500px;
     max-width:100%;
     margin:20px auto;
-    border:1px solid #ddd;
-    background:white;
-    border-radius:10px;
-    padding:10px;
 }
 
 #status{
-    margin-top:20px;
     font-size:20px;
-    font-weight:bold;
     color:#0066cc;
 }
-
-.success{
-    color:green;
-}
-
-.error{
-    color:red;
-}
 </style>
-</head>
 
+</head>
 <body>
 
 <div class="container">
@@ -57,13 +43,13 @@ h1{
 
 <p>
 QRコードをカメラにかざしてください。<br>
-読み取り後、自動で受付ページへ移動します。
+読み取り後、自動で移動します。
 </p>
 
 <div id="reader"></div>
 
 <div id="status">
-カメラを起動しています...
+カメラ起動中...
 </div>
 
 </div>
@@ -72,72 +58,63 @@ QRコードをカメラにかざしてください。<br>
 
 let scanned = false;
 
-const statusArea = document.getElementById("status");
+const statusArea =
+document.getElementById("status");
 
-function onScanSuccess(decodedText) {
+function onScanSuccess(decodedText){
 
-    if (scanned) return;
+    if(scanned) return;
 
     scanned = true;
 
-    try {
+    try{
 
         const url = new URL(decodedText);
 
-        statusArea.className = "success";
         statusArea.innerText =
-            "QRコードを認識しました。移動します...";
+        "QRコードを認識しました。移動します...";
 
-        setTimeout(() => {
-            window.location.href = url.href;
-        }, 500);
+        window.location.href = url.href;
 
-    } catch (e) {
+    }catch(e){
 
-        statusArea.className = "error";
         statusArea.innerText =
-            "URLではないQRコードです";
+        "URLではないQRコードです";
 
         scanned = false;
     }
 }
 
-function onScanFailure(error) {
-    // エラー表示不要
-}
-
-const html5QrCode = new Html5Qrcode("reader");
+const html5QrCode =
+new Html5Qrcode("reader");
 
 Html5Qrcode.getCameras()
 .then(cameras => {
 
-    if (cameras.length === 0) {
+    if(cameras.length > 0){
 
-        statusArea.className = "error";
         statusArea.innerText =
-            "カメラが見つかりません";
+        "QRコードをかざしてください";
 
-        return;
+        html5QrCode.start(
+            cameras[0].id,
+            {
+                fps:10,
+                qrbox:250
+            },
+            onScanSuccess
+        );
+
+    }else{
+
+        statusArea.innerText =
+        "カメラが見つかりません";
     }
-
-    statusArea.innerText =
-        "QRコードを読み取ってください";
-
-    html5QrCode.start(
-        cameras[0].id,
-        {
-            fps: 10,
-            qrbox: 250
-        },
-        onScanSuccess,
-        onScanFailure
-    );
 })
 .catch(err => {
 
-    statusArea.className = "error";
     statusArea.innerText =
-        "カメラの起動に失敗しました";
+    "カメラ起動エラー";
 
     console.error(err);
 });
